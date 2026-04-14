@@ -1,75 +1,78 @@
 """
-CLI Interface for the AI Economic Impact Dashboard.
+AI Economic Impact Dashboard CLI
+
+Command-line interface to access compute cost estimation, task exposure analysis,
+and governance timeline visualizations.
 """
 import argparse
 import sys
 import json
-from src.data.hardware import get_available_hardware, REGIONAL_PRICING_MULTIPLIERS
-from src.models.compute import calculate_training_cost
-from src.visualization.plots import plot_cost_projections, plot_cost_per_parameter, plot_regional_comparisons
+from src.analyzers.compute_cost import estimate_training_cost, project_inference_cost, compare_tco
+from src.analyzers.task_exposure import get_industry_exposure_data, analyze_exposure_by_type
+from src.governance.compliance import get_compliance_timeline
+from src.visualizations.plots import plot_cost_projections, plot_task_exposure_heatmap, plot_governance_timeline
 
 def main():
-    """Main CLI entrypoint."""
-    parser = argparse.ArgumentParser(description="AI Economic Impact Dashboard - Compute Cost Estimator")
-
+    """Main CLI entry point."""
+    parser = argparse.ArgumentParser(description="AI Economic Impact Dashboard CLI")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
-    # Estimate command
-    estimate_parser = subparsers.add_parser("estimate", help="Estimate training cost for a model")
-    estimate_parser.add_argument("--params", type=float, required=True, help="Number of parameters in billions")
-    estimate_parser.add_argument("--tokens", type=float, required=True, help="Number of training tokens in billions")
-    estimate_parser.add_argument("--hardware", type=str, default="H100_80GB", choices=get_available_hardware(), help="Hardware type to use")
-    estimate_parser.add_argument("--env", type=str, default="cloud", choices=["cloud", "on_premise"], help="Environment (cloud or on_premise)")
-    estimate_parser.add_argument("--region", type=str, default="US_EAST", choices=list(REGIONAL_PRICING_MULTIPLIERS.keys()), help="Region for pricing")
-    estimate_parser.add_argument("--utilization", type=float, default=0.4, help="Hardware Model FLOPs Utilization (MFU) rate")
-    estimate_parser.add_argument("--json", action="store_true", help="Output result as JSON")
+    # Compute Cost Estimator
+    compute_parser = subparsers.add_parser("compute", help="Estimate compute costs")
+    compute_subparsers = compute_parser.add_subparsers(dest="compute_command", help="Compute commands")
 
-    # Visualize command
-    viz_parser = subparsers.add_parser("visualize", help="Generate interactive visualizations")
+    training_parser = compute_subparsers.add_parser("training", help="Estimate training cost")
+    training_parser.add_argument("--params", type=float, required=True, help="Parameters in billions")
+    training_parser.add_argument("--tokens", type=float, required=True, help="Tokens in trillions")
+
+    inference_parser = compute_subparsers.add_parser("inference", help="Project inference costs")
+    inference_parser.add_argument("--current-cost", type=float, required=True, help="Current cost per 1M tokens")
+    inference_parser.add_argument("--years", type=int, default=5, help="Years to project (default: 5)")
+
+    tco_parser = compute_subparsers.add_parser("tco", help="Compare total cost of ownership")
+    tco_parser.add_argument("--tokens-monthly", type=float, required=True, help="Expected monthly tokens in millions")
+    tco_parser.add_argument("--api-cost", type=float, required=True, help="Cloud API cost per 1M tokens")
+    tco_parser.add_argument("--hardware-monthly", type=float, required=True, help="Monthly cost for self-hosted hardware")
+    tco_parser.add_argument("--ops-monthly", type=float, required=True, help="Monthly operational cost for self-hosting")
+    tco_parser.add_argument("--hybrid-percent", type=float, default=0.2, help="Fraction of tokens handled by API in hybrid setup (0.0 - 1.0)")
+
+    # Visualizations
+    viz_parser = subparsers.add_parser("visualize", help="Generate dashboard visualizations")
     viz_parser.add_argument("--all", action="store_true", help="Generate all visualizations")
 
     args = parser.parse_args()
 
-    if args.command == "estimate":
-        try:
-            result = calculate_training_cost(
-                params_b=args.params,
-                tokens_b=args.tokens,
-                hardware_name=args.hardware,
-                environment=args.env,
-                region=args.region,
-                utilization_rate=args.utilization
-            )
-
-            if args.json:
-                print(json.dumps(result, indent=2))
-            else:
-                print("\n=== Training Cost Estimate ===")
-                print(f"Model Size: {args.params}B params")
-                print(f"Training Tokens: {args.tokens}B tokens")
-                print(f"Hardware: {args.hardware} ({args.env}, {args.region})")
-                print(f"Utilization: {args.utilization*100}%")
-                print("-" * 30)
-                print(f"Total FLOPs: {result['total_flops']:.2e}")
-                print(f"Total Time: {result['total_time_hours']:.1f} hours ({result['total_time_days']:.1f} days)")
-                print(f"Hourly Cost: ${result['hourly_cost']:.2f}")
-                print(f"Total Cost: ${result['total_cost']:,.2f}")
-                print("==============================\n")
-
-        except Exception as e:
-            print(f"Error: {str(e)}", file=sys.stderr)
-            sys.exit(1)
-
+    if args.command == "compute":
+        if args.compute_command == "training":
+             res = estimate_training_cost(args.params, args.tokens)
+             print(json.dumps(res, indent=2))
+        elif args.compute_command == "inference":
+             res = project_inference_cost(args.current_cost, args.years)
+             print(json.dumps(res, indent=2))
+        elif args.compute_command == "tco":
+             res = compare_tco(args.tokens_monthly, args.api_cost, args.hardware_monthly, args.ops_monthly, args.hybrid_percent)
+             print(json.dumps(res, indent=2))
+        else:
+             compute_parser.print_help()
     elif args.command == "visualize":
         print("Generating visualizations...")
-        f1 = plot_cost_projections()
-        print(f"Created: {f1}")
-        f2 = plot_cost_per_parameter()
-        print(f"Created: {f2}")
-        f3 = plot_regional_comparisons()
-        print(f"Created: {f3}")
-        print("Done.")
 
+        # 1. Cost Projection
+        projections = project_inference_cost(0.48, 5) # Default baseline
+        plot_cost_projections(projections)
+        print("Created cost projection plot: output/cost_projection.html")
+
+        # 2. Task Exposure
+        exposure_df = get_industry_exposure_data()
+        plot_task_exposure_heatmap(exposure_df)
+        print("Created task exposure heatmap: output/task_exposure.html")
+
+        # 3. Governance Timeline
+        timeline_df = get_compliance_timeline()
+        plot_governance_timeline(timeline_df)
+        print("Created governance timeline: output/governance_timeline.html")
+
+        print("Done.")
     else:
         parser.print_help()
 

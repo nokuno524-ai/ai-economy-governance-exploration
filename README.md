@@ -1,74 +1,34 @@
-# AI Economic Impact Dashboard
+# AI Economy Impact & Governance Exploration
 
-This repository explores the economic impact of AI and governance frameworks. It includes a compute cost estimator prototype tool for modeling AI training costs.
+This project explores AI's economic impact and governance frameworks from a computer science perspective. It includes an 'AI Economic Impact Dashboard' which acts as a compute cost estimator, a task exposure analyzer, and a governance compliance engine.
 
-## Features
-
-- **Compute Cost Estimator:** Models AI training costs based on parameters (model size, training tokens, hardware type, cloud vs on-premise, utilization rate).
-- **Interactive Visualizations:** Generates Plotly visualizations showing cost projections over time, cost-per-parameter scaling, and regional cost comparisons.
-- **Historical Data:** Includes historical data points for model sizes, tokens, and estimated training costs.
-
-## Setup
-
-1. Clone the repository.
-2. Install the required dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-## Usage
-
-The main CLI application can be executed from the project root using:
-
-```bash
-PYTHONPATH=. python3 src/cli.py [command]
-```
-
-### Estimate Command
-
-Estimate the training cost for a specific model configuration:
-
-```bash
-PYTHONPATH=. python3 src/cli.py estimate --params 70 --tokens 15000 --hardware H100_80GB
-```
-
-**Options:**
-- `--params`: Number of parameters in billions (required).
-- `--tokens`: Number of training tokens in billions (required).
-- `--hardware`: Hardware type to use (e.g., `A100_80GB`, `H100_80GB`, `B200`).
-- `--env`: Environment (`cloud` or `on_premise`).
-- `--region`: Region for pricing (e.g., `US_EAST`, `EU_WEST`).
-- `--utilization`: Hardware Model FLOPs Utilization (MFU) rate.
-- `--json`: Output the result as JSON.
-
-### Visualize Command
-
-Generate interactive Plotly visualizations:
-
-```bash
-PYTHONPATH=. python3 src/cli.py visualize
-```
-
-Visualizations are saved as interactive HTML files in the `output/` directory:
-- `cost_projections.html`: Historical AI model training costs over time.
-- `cost_per_parameter.html`: Cost scaling by parameter size.
-- `regional_comparison.html`: Regional training cost comparison.
-
-## Testing
-
-The project uses `pytest` for testing. Run the test suite from the project root:
-
-```bash
-PYTHONPATH=. pytest tests/
-```
+## Overview
+- **Productivity Gains:** Tools to measure and correlate productivity impacts of AI.
+- **Labor Market Shifts:** Analysis tools to see what tasks and industries are exposed to AI augmentation/automation.
+- **Compute Economics:** Tools estimating training costs, projecting inference cost drops ("LLMflation"), and calculating Total Cost of Ownership (TCO).
+- **Governance Frameworks:** Compliance timelines checking AI milestones against regulations like the EU AI Act and US Executive Orders.
 
 ## Project Structure
+- `src/analyzers/`: Logic for estimating compute costs and mock data for task exposures.
+- `src/governance/`: Mock timelines for governance compliance.
+- `src/visualizations/`: Matplotlib and Plotly logic to graph cost drops, exposure heatmaps, and governance timelines.
+- `src/cli.py`: Command-Line Interface to easily use all tools.
 
-- `src/data/`: Hardware configuration, regional pricing, and historical model data.
-- `src/models/`: Compute cost calculation logic.
-- `src/visualization/`: Plotly visualization functions.
-- `src/api/`: Mock API client for fetching live pricing data.
-- `src/cli.py`: Command-line interface entry point.
-- `tests/`: Pytest unit and integration tests.
-- `output/`: Directory where generated HTML visualizations are saved.
+## Installation
+1. Clone the repository.
+2. Install dependencies via `pip install -r requirements.txt`. This will install `pytest`, `matplotlib`, `plotly`, `pandas`, and `kaleido`.
+
+## Tool Usage
+Run the CLI tool from the root directory:
+- To estimate AI model training cost: `PYTHONPATH=. python3 src/cli.py compute training --params <billions> --tokens <trillions>`
+- To project inference cost drop: `PYTHONPATH=. python3 src/cli.py compute inference --current-cost <cost_per_million_tokens> --years <num_years>`
+- To compare total cost of ownership (TCO): `PYTHONPATH=. python3 src/cli.py compute tco --tokens-monthly <millions> --api-cost <cost> --hardware-monthly <cost> --ops-monthly <cost>`
+- To generate visualizations (cost projection, task exposure, governance timeline): `PYTHONPATH=. python3 src/cli.py visualize --all`
+  - Output files are saved interactively as `.html` files in the `output/` directory.
+
+## Methodology & Data Sources
+- Training compute estimations are based on the approximation `6 * params * tokens` for FLOPs.
+- Inference projections use historical trends of a 10x cost reduction per year.
+- Data sources mock O*NET for task exposure and synthesize real-world regulatory milestones (EU AI Act, US EOs).
+
+See `RESEARCH.md` for full detailed background research and paper references.
