@@ -8,8 +8,8 @@ import argparse
 import sys
 import json
 from src.analyzers.compute_cost import estimate_training_cost, project_inference_cost, compare_tco
-from src.analyzers.task_exposure import get_industry_exposure_data, analyze_exposure_by_type
-from src.governance.compliance import get_compliance_timeline
+from src.analyzers.task_exposure import get_industry_exposure_data, analyze_exposure_by_type, estimate_exposure
+from src.governance.compliance import get_compliance_timeline, check_compliance
 from src.visualizations.plots import plot_cost_projections, plot_task_exposure_heatmap, plot_governance_timeline
 
 def main():
@@ -36,6 +36,15 @@ def main():
     tco_parser.add_argument("--ops-monthly", type=float, required=True, help="Monthly operational cost for self-hosting")
     tco_parser.add_argument("--hybrid-percent", type=float, default=0.2, help="Fraction of tokens handled by API in hybrid setup (0.0 - 1.0)")
 
+    # Task Exposure
+    exposure_parser = subparsers.add_parser("exposure", help="Analyze task exposure")
+    exposure_parser.add_argument("--tasks", type=str, required=True, help="JSON string representing occupation tasks")
+    exposure_parser.add_argument("--benchmarks", type=str, required=True, help="JSON string representing AI capability benchmarks")
+
+    # Governance Compliance
+    compliance_parser = subparsers.add_parser("compliance", help="Check governance compliance")
+    compliance_parser.add_argument("--system", type=str, required=True, help="JSON string representing the AI system description")
+
     # Visualizations
     viz_parser = subparsers.add_parser("visualize", help="Generate dashboard visualizations")
     viz_parser.add_argument("--all", action="store_true", help="Generate all visualizations")
@@ -54,6 +63,23 @@ def main():
              print(json.dumps(res, indent=2))
         else:
              compute_parser.print_help()
+    elif args.command == "exposure":
+        try:
+            tasks = json.loads(args.tasks)
+            benchmarks = json.loads(args.benchmarks)
+            score = estimate_exposure(tasks, benchmarks)
+            print(json.dumps({"exposure_score": score}, indent=2))
+        except json.JSONDecodeError:
+            print("Error: Invalid JSON string for --tasks or --benchmarks.")
+            sys.exit(1)
+    elif args.command == "compliance":
+        try:
+            system_desc = json.loads(args.system)
+            report = check_compliance(system_desc)
+            print(json.dumps(report, indent=2))
+        except json.JSONDecodeError:
+            print("Error: Invalid JSON string for --system.")
+            sys.exit(1)
     elif args.command == "visualize":
         print("Generating visualizations...")
 

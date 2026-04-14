@@ -13,7 +13,8 @@ def test_plot_task_exposure_heatmap(tmp_path):
     output_path = tmp_path / "test_task_exp.html"
     df = pd.DataFrame({
         "Industry": ["A", "B"],
-        "AI_Exposure_Score": [0.1, 0.9]
+        "AI_Exposure_Score": [0.1, 0.9],
+        "Skill_Level": ["High", "Low"]
     })
     plot_task_exposure_heatmap(df, str(output_path))
     assert os.path.exists(output_path)

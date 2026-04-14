@@ -33,20 +33,19 @@ def plot_cost_projections(projections: Dict[int, float], output_path: str = "out
 
 def plot_task_exposure_heatmap(exposure_df: pd.DataFrame, output_path: str = "output/task_exposure.html"):
     """
-    Plots a heatmap-style bar chart of AI exposure by industry using plotly.
+    Plots a heatmap-style bar chart of AI exposure by industry and skill level using plotly.
 
     Args:
-        exposure_df (pd.DataFrame): DataFrame with 'Industry' and 'AI_Exposure_Score'.
+        exposure_df (pd.DataFrame): DataFrame with 'Industry', 'AI_Exposure_Score', and 'Skill_Level'.
         output_path (str): File path to save the plot as an HTML file.
     """
-    df_sorted = exposure_df.sort_values("AI_Exposure_Score", ascending=True)
+    df_sorted = exposure_df.sort_values(["Skill_Level", "AI_Exposure_Score"], ascending=[False, True])
 
     fig = px.bar(df_sorted, x="AI_Exposure_Score", y="Industry", orientation='h',
-                 color="AI_Exposure_Score",
-                 color_continuous_scale="Reds",
-                 title="AI Task Exposure by Industry")
+                 color="Skill_Level", barmode="group",
+                 title="AI Task Exposure by Industry and Skill Level")
 
-    fig.update_layout(xaxis_title="Exposure Score (0.0 - 1.0)", yaxis_title="")
+    fig.update_layout(xaxis_title="Exposure Score (0.0 - 1.0)", yaxis_title="Industry")
 
     # Ensure output directory exists
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
