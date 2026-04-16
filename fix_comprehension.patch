@@ -1,0 +1,11 @@
+--- src/visualizations/plots.py
++++ src/visualizations/plots.py
+@@ -69,7 +69,7 @@
+         jurisdictions.append(reg.jurisdiction)
+         # Format lists as HTML lists or comma-separated strings for better display in the table
+         scopes.append("<br>".join([f"• {item}" for item in reg.scope]))
+-        requirements.append("<br>".join([f"• {req}" for item in reg.compliance_requirements for req in [item]])) # Correctly formatting requirements
++        requirements.append("<br>".join([f"• {req}" for req in reg.compliance_requirements])) # Correctly formatting requirements
+
+     fig = go.Figure(data=[go.Table(
+         header=dict(values=headers,
