@@ -19,7 +19,19 @@ This project explores AI's economic impact and governance frameworks from a comp
 2. Install dependencies via `pip install -r requirements.txt`. This will install `pytest`, `matplotlib`, `plotly`, `pandas`, and `kaleido`.
 
 ## Tool Usage
-Run the CLI tool from the root directory:
+
+### Estimator CLI (Minimal Dependency Tool)
+The lightweight `estimator` package allows you to run fast, fully offline calculations for compute costs and task exposure without heavy dependencies (e.g., pandas). Run it from the root directory as follows:
+
+- **Estimate Training Cost:**
+  `python -m estimator training --gpus 8 --hours 10 --gpu-type a100 --markdown`
+- **Estimate Inference Cost:**
+  `python -m estimator inference --tokens-in 1000000 --tokens-out 500000 --model-class small --csv`
+- **Analyze Task Exposure (Occupation Level):**
+  `python -m estimator exposure --level occupation --json`
+
+### Main Dashboard CLI
+Run the main CLI tool from the root directory:
 - To estimate AI model training cost: `PYTHONPATH=. python3 src/cli.py compute training --params <billions> --tokens <trillions>`
 - To project inference cost drop: `PYTHONPATH=. python3 src/cli.py compute inference --current-cost <cost_per_million_tokens> --years <num_years>`
 - To compare total cost of ownership (TCO): `PYTHONPATH=. python3 src/cli.py compute tco --tokens-monthly <millions> --api-cost <cost> --hardware-monthly <cost> --ops-monthly <cost>`
@@ -32,3 +44,4 @@ Run the CLI tool from the root directory:
 - Data sources mock O*NET for task exposure and synthesize real-world regulatory milestones (EU AI Act, US EOs).
 
 See `RESEARCH.md` for full detailed background research and paper references.
+See `METHODOLOGY.md` for the methodology behind the illustrative estimates in the `estimator` tool.
