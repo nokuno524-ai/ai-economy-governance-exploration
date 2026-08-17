@@ -1,0 +1,25 @@
+{
+  "Software Developers": {
+    "sector": "Technology",
+    "tasks": [
+        {"name": "Writing code", "exposure": 0.8},
+        {"name": "Debugging", "exposure": 0.6},
+        {"name": "System architecture design", "exposure": 0.2}
+    ]
+  },
+  "Data Entry Keyers": {
+    "sector": "Administration",
+    "tasks": [
+        {"name": "Typing data from documents", "exposure": 0.95},
+        {"name": "Verifying data accuracy", "exposure": 0.7}
+    ]
+  },
+  "Registered Nurses": {
+    "sector": "Healthcare",
+    "tasks": [
+        {"name": "Administering medication", "exposure": 0.05},
+        {"name": "Patient consultation", "exposure": 0.1},
+        {"name": "Updating patient records", "exposure": 0.5}
+    ]
+  }
+}

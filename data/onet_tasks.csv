@@ -1,0 +1,14 @@
+Occupation,Task,Routine,Cognitive,Discretizable,AI_Suitable
+Software Developers,Write modular code,0,1,1,1
+Software Developers,Debug complex system issues,0,1,0,0
+Data Entry Keyers,Type data from documents,1,1,1,1
+Data Entry Keyers,Verify data accuracy against rules,1,1,1,1
+Registered Nurses,Administer medication,1,0,1,0
+Registered Nurses,Patient consultation and empathy,0,1,0,0
+Registered Nurses,Update patient electronic records,1,1,1,1
+Retail Salespersons,Process transactions,1,1,1,1
+Retail Salespersons,Assist customers with choices,0,1,0,0
+Plumbers,Install pipe systems,0,0,1,0
+Plumbers,Diagnose leaks,0,1,0,0
+Lawyers,Review legal documents,1,1,1,1
+Lawyers,Argue in court,0,1,0,0

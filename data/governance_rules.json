@@ -1,0 +1,51 @@
+{
+  "jurisdictions": {
+    "EU": {
+      "risk_tiers": [
+        {
+          "tier": "Unacceptable Risk",
+          "conditions": [
+            {"key": "uses_biometrics", "value": true},
+            {"key": "social_scoring", "value": true}
+          ],
+          "obligations": ["Prohibited"]
+        },
+        {
+          "tier": "High Risk",
+          "conditions": [
+            {"key": "is_high_risk", "value": true}
+          ],
+          "obligations": [
+            "Conformity assessment",
+            "Data governance",
+            "Transparency",
+            "Human oversight"
+          ]
+        },
+        {
+          "tier": "Minimal/Limited Risk",
+          "conditions": [],
+          "obligations": ["Transparency requirements"]
+        }
+      ]
+    },
+    "US": {
+      "themes": [
+        {
+          "theme": "Deregulatory Stance (EO 14179)",
+          "conditions": [
+            {"key": "federal_use", "value": false}
+          ],
+          "obligations": ["Monitor federal preemption of state laws", "Leverage infrastructure focus"]
+        },
+        {
+          "theme": "Safe, Secure AI (EO 14110)",
+          "conditions": [
+            {"key": "foundation_model", "value": true}
+          ],
+          "obligations": ["Red-teaming tests reporting", "Safety and security standards"]
+        }
+      ]
+    }
+  }
+}

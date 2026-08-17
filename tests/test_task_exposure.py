@@ -39,3 +39,21 @@ def test_get_industry_exposure_data():
     assert "AI_Exposure_Score" in df.columns
     assert "Skill_Level" in df.columns
     assert len(df) > 0
+
+def test_analyze_task_exposure_rubric():
+    from src.analyzers.task_exposure import analyze_task_exposure_rubric
+
+    # Analyze default data/onet_tasks.csv
+    ranked = analyze_task_exposure_rubric()
+
+    assert isinstance(ranked, list)
+    assert len(ranked) > 0
+
+    # First item should have highest exposure
+    assert ranked[0]["Exposure_Score"] >= ranked[-1]["Exposure_Score"]
+
+    # Data Entry Keyers should have high exposure (1.0 in our csv)
+    for r in ranked:
+        if r["Occupation"] == "Data Entry Keyers":
+            assert r["Exposure_Score"] == 1.0
+            break

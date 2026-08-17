@@ -104,3 +104,48 @@ def estimate_exposure(occupation_tasks: List[Dict[str, Any]], ai_benchmarks: Dic
             exposed_tasks += 1
 
     return exposed_tasks / len(occupation_tasks)
+
+import csv
+import os
+
+def analyze_task_exposure_rubric(csv_path: str = "data/onet_tasks.csv") -> List[Dict[str, Any]]:
+    """
+    Analyzes task exposure using a heuristic rubric from research literature.
+    Score = (Routine + Cognitive + Discretizable + AI_Suitable) / 4.0
+    Then ranks occupations by average task exposure.
+
+    Args:
+        csv_path (str): Path to the CSV containing task rubric data.
+
+    Returns:
+        List[Dict[str, Any]]: Ranked list of occupations with their average exposure score.
+    """
+    if not os.path.exists(csv_path):
+        raise FileNotFoundError(f"Could not find {csv_path}")
+
+    occupations = {}
+
+    with open(csv_path, mode='r', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            occ = row["Occupation"]
+            routine = float(row["Routine"])
+            cognitive = float(row["Cognitive"])
+            discretizable = float(row["Discretizable"])
+            ai_suitable = float(row["AI_Suitable"])
+
+            # Simple average of the 4 boolean/binary traits for the task score
+            task_score = (routine + cognitive + discretizable + ai_suitable) / 4.0
+
+            if occ not in occupations:
+                occupations[occ] = []
+            occupations[occ].append(task_score)
+
+    ranked = []
+    for occ, scores in occupations.items():
+        avg_score = sum(scores) / len(scores)
+        ranked.append({"Occupation": occ, "Exposure_Score": avg_score})
+
+    # Sort descending
+    ranked.sort(key=lambda x: x["Exposure_Score"], reverse=True)
+    return ranked

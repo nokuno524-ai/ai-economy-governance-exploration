@@ -38,8 +38,10 @@ def main():
 
     # Task Exposure
     exposure_parser = subparsers.add_parser("exposure", help="Analyze task exposure")
-    exposure_parser.add_argument("--tasks", type=str, required=True, help="JSON string representing occupation tasks")
-    exposure_parser.add_argument("--benchmarks", type=str, required=True, help="JSON string representing AI capability benchmarks")
+    exposure_parser.add_argument("--tasks", type=str, required=False, help="JSON string representing occupation tasks")
+    exposure_parser.add_argument("--benchmarks", type=str, required=False, help="JSON string representing AI capability benchmarks")
+    exposure_parser.add_argument("--rubric", action="store_true", help="Analyze using the transparent heuristic rubric (CSV dataset)")
+    exposure_parser.add_argument("--filter-occupations", type=str, nargs="+", help="Filter by occupation names when using --rubric")
 
     # Governance Compliance
     compliance_parser = subparsers.add_parser("compliance", help="Check governance compliance")
@@ -48,6 +50,9 @@ def main():
     # Visualizations
     viz_parser = subparsers.add_parser("visualize", help="Generate dashboard visualizations")
     viz_parser.add_argument("--all", action="store_true", help="Generate all visualizations")
+
+    # Interactive Dashboard
+    dashboard_parser = subparsers.add_parser("dashboard", help="Generate an integrated interactive dashboard HTML")
 
     args = parser.parse_args()
 
@@ -64,14 +69,28 @@ def main():
         else:
              compute_parser.print_help()
     elif args.command == "exposure":
-        try:
-            tasks = json.loads(args.tasks)
-            benchmarks = json.loads(args.benchmarks)
-            score = estimate_exposure(tasks, benchmarks)
-            print(json.dumps({"exposure_score": score}, indent=2))
-        except json.JSONDecodeError:
-            print("Error: Invalid JSON string for --tasks or --benchmarks.")
-            sys.exit(1)
+        if args.rubric:
+            from src.analyzers.task_exposure import analyze_task_exposure_rubric
+            try:
+                ranked = analyze_task_exposure_rubric()
+                if args.filter_occupations:
+                    ranked = [r for r in ranked if r["Occupation"] in args.filter_occupations]
+                print(json.dumps(ranked, indent=2))
+            except Exception as e:
+                print(f"Error: {e}")
+                sys.exit(1)
+        else:
+            if not args.tasks or not args.benchmarks:
+                print("Error: --tasks and --benchmarks are required unless --rubric is used.")
+                sys.exit(1)
+            try:
+                tasks = json.loads(args.tasks)
+                benchmarks = json.loads(args.benchmarks)
+                score = estimate_exposure(tasks, benchmarks)
+                print(json.dumps({"exposure_score": score}, indent=2))
+            except json.JSONDecodeError:
+                print("Error: Invalid JSON string for --tasks or --benchmarks.")
+                sys.exit(1)
     elif args.command == "compliance":
         try:
             system_desc = json.loads(args.system)
@@ -99,6 +118,9 @@ def main():
         print("Created governance timeline: output/governance_timeline.html")
 
         print("Done.")
+    elif args.command == "dashboard":
+        from src.visualizations.dashboard import generate_dashboard
+        generate_dashboard()
     else:
         parser.print_help()
 
